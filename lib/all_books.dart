@@ -8,7 +8,6 @@ class AllBooks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     var provider = context.watch<BookProvider>();
 
     return Scaffold(
@@ -17,10 +16,48 @@ class AllBooks extends StatelessWidget {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: FutureBuilder<List<Books>>(
-          future: provider.showAllBooks(),
-          builder: (_, s) => s.connectionState == ConnectionState.done ? buildView(context, s) : const CircularProgressIndicator(),
-        ),
+        //   child: FutureBuilder<List<Books>>(
+        //     future: provider.showAllBooks(),
+        //     builder: (_, s) => s.connectionState == ConnectionState.done ? {
+        //     if (s.hasData) {
+        //       if (s.data.isEmpty) {
+        // return Center(
+        // child: Text(
+        // 'No Words history',
+        // style: noDef,
+        // ),
+        // );
+        // }
+        //
+        //       return buil
+        //
+        // }
+        //     } : const CircularProgressIndicator(),
+        //   ),
+
+        // child: FutureBuilder<List<Books>>(
+        //   future: provider.showAllBooks(),
+        //   builder: (context, s) {
+        //     if (s.hasData) {
+        //       if (s.data!.isEmpty) {
+        //         return const Center(
+        //           child: Text(
+        //             'No Books',
+        //           ),
+        //         );
+        //       }
+        //
+        //       return buildView(context, s);
+        //     }
+        //     return const Center(
+        //       child: CircularProgressIndicator(),
+        //     );
+        //   },
+        // ),
+
+        child: buildView(context),
+
+
       ),
       floatingActionButton: FloatingActionButton(
         child: Text("add"),
@@ -29,38 +66,54 @@ class AllBooks extends StatelessWidget {
     );
   }
 
-  dynamic buildView(BuildContext context, AsyncSnapshot<List<Books>> books) {
-
+  dynamic buildView(BuildContext context) {
     var p = context.watch<BookProvider>();
 
-    // return ListView(
-    //   children: books.data!.map((e) {
-    //     return Card(
-    //       child: Text(e.author!),
+    // return ListView.builder(
+    //   itemCount: books.data!.length,
+    //   itemBuilder: (_, i) {
+    //     var r = books.data![i];
+    //
+    //     return ListTile(
+    //       title: Text(r.title!),
+    //       subtitle: Text(r.author!),
+    //       trailing: Column(
+    //         mainAxisSize: MainAxisSize.min,
+    //         children: [
+    //           Text(r.publishYear!),
+    //           Expanded(
+    //             child: ElevatedButton(
+    //                 onPressed: () {
+    //                   books.data!.removeAt(i);
+    //                   p.removeItem(i);
+    //                 },
+    //                 child: Text("Del")),
+    //           )
+    //         ],
+    //       ),
     //     );
-    //   }).toList(),
+    //   },
     // );
 
-    return ListView.builder(
-      itemCount: books.data!.length,
-      itemBuilder: (_, i) {
-
-        var r = books.data![i];
-
-        return Dismissible(
-          key: UniqueKey(),
-          onDismissed: (_) {
-            books.data!.removeAt(i);
-            p.removeItem(i);
-          },
-          child: ListTile(
-            title: Text(r.title!),
-            subtitle: Text(r.author!),
-            trailing: Text(r.publishYear!),
-          ),
-        );
-      },
+    return p.books.isEmpty ? const Center(child: Text("No books!!"),) : ListView(
+      shrinkWrap: true,
+      children: p.books.map((e) => ListTile(
+        title: Text(e.title!),
+        subtitle: Text(e.author!),
+        trailing: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(e.publishYear!),
+            Expanded(
+              child: ElevatedButton(
+                  onPressed: () {
+                    p.removeItem(e);
+                  },
+                  child: Text("Del")),
+            )
+          ],
+        ),
+      ),).toList(),
     );
-
   }
 }

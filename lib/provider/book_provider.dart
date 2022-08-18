@@ -4,34 +4,53 @@ import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
 class BookProvider extends ChangeNotifier {
-  Future<List<Books>> showAllBooks() async {
+  List<Books> _books = [];
+
+  List<Books> get books => _books;
+
+  BookProvider() {
+    init();
+  }
+
+  init() async {
     var i = await isar;
-    return i.books.where().findAll();
+
+    await i.txn(() async {
+      final allBooks = i.books;
+      _books = await allBooks.where().findAll();
+      notifyListeners();
+    });
   }
 
   dynamic addNew() async {
     var i = await isar;
 
     var data = Books()
-      ..title = "Aab-e-Hayat"
+      ..title = "Peer-e-Kamil"
       ..author = "Umera Ahmed"
       ..publishYear = "2017";
 
     i.writeTxn(() async {
-      await i.books.put(data);
-    });
+      int id = await i.books.put(data);
 
-    showAllBooks();
-    notifyListeners();
+      _books.add(data);
+      notifyListeners();
+    });
   }
 
-  dynamic removeItem(int i) async {
+  dynamic removeItem(Books b) async {
     var data = await isar;
 
-    data.writeTxn(() async {
-      await data.books.delete(i);
+    await data.writeTxn(() async {
+      bool deleted = await data.books.delete(b.id);
+
+      if (deleted) {
+        _books.remove(b);
+        notifyListeners();
+      }
+      else {
+        print("else");
+      }
     });
-    showAllBooks();
-    notifyListeners();
   }
 }
